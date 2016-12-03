@@ -14,7 +14,7 @@ class image_converter:
         self.movement_data = rospy.Publisher("movement_data",Point,queue_size=10)
 
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/usb_cam/image_raw",Image,self.callback)
+        self.image_sub = rospy.Subscriber("/cameras/left_hand_camera/image",Image,self.callback)
         self.pts = deque(maxlen=32)
         self.deltaValues = Point()
 
@@ -34,7 +34,7 @@ class image_converter:
         mask = cv2.dilate(mask, None, iterations=7)
         output = cv2.bitwise_and(imgOriginal, imgOriginal, mask = mask)
         outputGrayscale = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
-        contours = cv2.findContours(outputGrayscale,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)[1]
+        contours = cv2.findContours(outputGrayscale,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)[0]
 
         if len(contours) > 0:
             c = max(contours,key=cv2.contourArea)
