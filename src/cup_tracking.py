@@ -10,12 +10,16 @@ from collections import deque
 
 class image_converter:
     def __init__(self):
-        self.image_pub = rospy.Publisher("image_topic_2",Image,queue_size=10)
-        self.movement_data = rospy.Publisher("movement_data",Point,queue_size=10)
-
         self.bridge = CvBridge()
+<<<<<<< HEAD
         self.image_sub = rospy.Subscriber("/cameras/left_hand_camera/image",Image,self.callback)
         self.pts = deque(maxlen=32)
+=======
+        self.image_sub = rospy.Subscriber("/usb_cam/image_raw",Image,self.callback)
+        self.pts1 = deque(maxlen=32)
+        self.pts2 = deque(maxlen=32)
+        self.pts3 = deque(maxlen=32)
+>>>>>>> c6eec48003e1a51e30342c4f46e16e4a7070b934
         self.deltaValues = Point()
 
     def callback(self,data):
@@ -36,34 +40,44 @@ class image_converter:
         outputGrayscale = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
         contours = cv2.findContours(outputGrayscale,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)[0]
 
-        if len(contours) > 0:
-            c = max(contours,key=cv2.contourArea)
-            ((x,y),radius) = cv2.minEnclosingCircle(c)
-            M = cv2.moments(c)
-            ballCenter = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        if len(contours) > 2:
+            contours = sorted(contours, key = cv2.contourArea, reverse = True)[:10]
+            c1 = contours[0]
+            c2 = contours[1]
+            c3 = contours[2]
+            ((x1,y1),radius1) = cv2.minEnclosingCircle(c1)
+            ((x2,y2),radius2) = cv2.minEnclosingCircle(c2)
+            ((x3,y3),radius3) = cv2.minEnclosingCircle(c3)
+            M1 = cv2.moments(c1)
+            M2 = cv2.moments(c2)
+            M3 = cv2.moments(c3)
+            ballCenter1 = (int(M1["m10"] / M1["m00"]), int(M1["m01"] / M1["m00"]))
+            ballCenter2 = (int(M2["m10"] / M2["m00"]), int(M2["m01"] / M2["m00"]))
+            ballCenter3 = (int(M3["m10"] / M3["m00"]), int(M3["m01"] / M3["m00"]))
 
-            if radius > 10:
-                cv2.circle(imgOriginal,(int(x),int(y)),int(radius),(0,255,0),2)
-                cv2.circle(imgOriginal,ballCenter,5,(0,0,255),-1)
-                self.pts.appendleft(ballCenter)
-                # print "Ball Center:",ballCenter,
-                print "Ball Center x:",ballCenter[0],
-                print "Ball Center y:",ballCenter[1],
-                print "Image Center x:",imgOriginal.shape[1]/2,
-                print "Image Center y:",imgOriginal.shape[0]/2
-                self.deltaValues.x = ballCenter[0] - imgOriginal.shape[1]/2 # if this is positive, we want to increase the value of panAngle
-                self.deltaValues.y = imgOriginal.shape[0]/2 - ballCenter[1] # if this is positive, we want to increase the value of tiltAngle
-                if self.deltaValues.x > 640 or self.deltaValues.x < -640:
-                    self.deltaValues.x = 0
-                if self.deltaValues.y > 480 or self.deltaValues.y < -480:
-                    self.deltaValues.y = 0
-                self.deltaValues.x *= (1008/640)
-                self.deltaValues.y *= (1008/480)
-                rospy.loginfo(self.deltaValues)
-                self.movement_data.publish(self.deltaValues)
-                for i in np.arange(1,len(self.pts)):
-                    thickness = int(np.sqrt(32/float(i+1))*2.5)
-                    cv2.line(imgOriginal,self.pts[i-1],self.pts[i],(0,0,255),thickness)
+            if radius1 > 10:
+                cv2.circle(imgOriginal,(int(x1),int(y1)),int(radius1),(0,255,0),2)
+                cv2.circle(imgOriginal,ballCenter1,5,(0,0,255),-1)
+                self.pts1.appendleft(ballCenter1)
+                for i in np.arange(1,len(self.pts1)):
+                    thickness1 = int(np.sqrt(32/float(i+1))*2.5)
+                    cv2.line(imgOriginal,self.pts1[i-1],self.pts1[i],(0,0,255),thickness1)
+
+            if radius2 > 10:
+                cv2.circle(imgOriginal,(int(x2),int(y2)),int(radius2),(0,255,0),2)
+                cv2.circle(imgOriginal,ballCenter2,5,(0,0,255),-1)
+                self.pts2.appendleft(ballCenter2)
+                for i in np.arange(1,len(self.pts2)):
+                    thickness2 = int(np.sqrt(32/float(i+1))*2.5)
+                    cv2.line(imgOriginal,self.pts2[i-1],self.pts2[i],(0,0,255),thickness2)
+
+            if radius3 > 10:
+                cv2.circle(imgOriginal,(int(x3),int(y3)),int(radius3),(0,255,0),2)
+                cv2.circle(imgOriginal,ballCenter3,5,(0,0,255),-1)
+                self.pts3.appendleft(ballCenter3)
+                for i in np.arange(1,len(self.pts3)):
+                    thickness3 = int(np.sqrt(32/float(i+1))*2.5)
+                    cv2.line(imgOriginal,self.pts3[i-1],self.pts3[i],(0,0,255),thickness3)
 
         flipped = cv2.flip(imgOriginal, 1)
         output = cv2.flip(output, 1)
