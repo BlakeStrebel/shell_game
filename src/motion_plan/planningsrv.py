@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+from shell_game.srv import *
+import rospy
+
 import struct
 import numpy as np
 
-import rospy
 import moveit_commander
 import moveit_msgs.msg
 
@@ -23,12 +25,6 @@ from geometry_msgs.msg import (
     Pose,
     Point,
     Quaternion)
-
-def initplannode(des_pose):
-    print "\r\nTesting position 1"
-    print des_pose
-    move_pos(des_pose)
-    return
 
 def ik_timeout(req, timeout=3.0):
     limb = "right"
@@ -91,6 +87,7 @@ def move_pos(des_pose, timeout=3.0):
                    }.get(resp_seeds[0], 'None')
         print("SUCCESS - Valid Joint Solution Found from Seed Type: %s" %
               (seed_str))
+        sucval = True
         # Format solution into Limb API-compatible dictionary
         limb_joints = dict(zip(resp.joints[0].name, resp.joints[0].position))
         print "\nIK Joint Solution:\n", limb_joints
@@ -106,6 +103,7 @@ def move_pos(des_pose, timeout=3.0):
         ra.go()
     else:
         print("INVALID POSE - No Valid Joint Solution Found.")
+        sucval = False
         print("Trying random seeds until timeout is reached")
         ikt = ik_timeout(ikreq,timeout=timeout)
         print "\r\n","ikt = "
@@ -118,4 +116,18 @@ def move_pos(des_pose, timeout=3.0):
             right_arm_group.set_joint_value_target(des_joints)
             right_arm_group.plan()
             right_arm_group.go()            
-    return
+    return sucval
+
+def handle_plan(req):
+    print "Desired postion is [ %f, %f, -0.32+0.13+0.05, 0.99, 0.01, 0.01, 0.01]"%(req.a, req.b)
+    statusval = move_pos(des_pose)
+    return planToLocResponse(statusval)
+
+def plan_to_loc_server():
+    rospy.init_node('plan_to_loc_server')
+    s = rospy.Service('plan_to_loc', planToLoc, handle_plan)
+    print "Ready to get motion plan"
+    rospy.spin()
+
+if __name__ == "__main__":
+    plan_to_loc_server()
