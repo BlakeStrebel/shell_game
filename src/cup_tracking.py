@@ -42,7 +42,7 @@ class image_converter:
         mask = cv2.dilate(mask, None, iterations=7)
         output = cv2.bitwise_and(imgOriginal, imgOriginal, mask = mask)
         outputGrayscale = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
-        contours = cv2.findContours(outputGrayscale,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)[1]
+        contours = cv2.findContours(outputGrayscale,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)[0]
 
         radius = [0,0,0]
         x = [[0,0],[0,0],[0,0]]
