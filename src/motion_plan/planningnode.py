@@ -117,9 +117,8 @@ def move_pos(des_pose, timeout=3.0):
             des_joints = [0]*7
             for i in range(7):
                 des_joints[i] = ikt.joints[0].position[i]
-            ra = moveit_commander.MoveGroupCommander("right_arm")
-            ra.set_joint_value_target(des_joints)
-            ra.plan()
-            ra.go()
+            right_arm_group.set_joint_value_target(des_joints)
+            right_arm_group.plan()
+            right_arm_group.go()            
     return
 

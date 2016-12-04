@@ -1,0 +1,28 @@
+<launch>
+
+  <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="1.28 0.10 0.19 0 0 0 base camera_link 1000" />
+
+  <include file="$(find baxter_moveit_config)/launch/planning_context.launch">
+    <arg name="load_robot_description" value="true"/>
+  </include>
+
+  <include file="$(find baxter_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="true"/>
+  </include>
+
+  <!-- Gripper Argument -->
+  <arg name="gripper" default="right" />
+
+  <!-- Start the Gripper Action Server -->
+  <node name="rsdk_gripper_action_server" pkg="baxter_interface" type="gripper_action_server.py" args="--gripper $(arg gripper)" required="true" />
+  
+  <node pkg="baxter_interface" type="joint_trajectory_action_server.py" name="joint_traj_action_srv" output="screen" 
+	respawn="false" />
+  
+  <node pkg="shell_game" type="mainnode2.py" name="plannode" output="screen" 
+	respawn="false"/>
+
+  <!--<node pkg="shell_game" type="Pixel_to_Physical.py" name="convertpixeltocoord" output="screen" 
+	respawn="false"/>-->
+ 
+</launch>
