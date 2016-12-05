@@ -6,14 +6,13 @@ import numpy as np
 from geometry_msgs.msg import Point
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-from collections import deque
 
-class image_converter:
+class treasure_finder:
     def __init__(self):
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/cameras/left_hand_camera/image",Image,self.callback)
-        self.pts = deque(maxlen=32)
-        self.deltaValues = Point()
+        self.pub = rospy.Publisher("initial_treasure_location",Point, queue_size=10)
+        self.treasurePoint = Point()
 
     def callback(self,data):
         try:
@@ -24,8 +23,7 @@ class image_converter:
         blurred = cv2.GaussianBlur(imgOriginal,(11,11),0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-        # green
-        lower = np.array([60,90,70])
+        lower = np.array([60,90,70])    # hsv range for green
         upper = np.array([90,175,255])
         mask = cv2.inRange(hsv, lower, upper)
         mask = cv2.erode(mask, None, iterations=7)
@@ -43,27 +41,14 @@ class image_converter:
             ((x,y),radius) = cv2.minEnclosingCircle(c)
             M = cv2.moments(c)
             treasureCenter = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+            self.treasurePoint.x = treasureCenter[0]
+            self.treasurePoint.y = treasureCenter[1]
+            self.pub.publish(self.treasurePoint)
 
-            cv2.circle(imgOriginal,(int(x),int(y)),int(radius),(0,255,0),2)
-            cv2.circle(imgOriginal,treasureCenter,5,(0,0,255),-1)
-            self.pts.appendleft(treasureCenter)
-            print "Treasure Center x:",treasureCenter[0],
-            print "Treasure Center y:",treasureCenter[1],
-            print "Image Center x:",imgOriginal.shape[1]/2,
-            print "Image Center y:",imgOriginal.shape[0]/2
-            for i in np.arange(1,len(self.pts)):
-                thickness = int(np.sqrt(32/float(i+1))*2.5)
-                cv2.line(imgOriginal,self.pts[i-1],self.pts[i],(0,0,255),thickness)
-
-        flipped = cv2.flip(imgOriginal, 1)
-        output = cv2.flip(output, 1)
-        cv2.imshow("Image", flipped)
-        cv2.imshow("MyImage", output)
-        cv2.waitKey(3)
 
 def main(args):
     rospy.init_node('find_treasure', anonymous=True)
-    ic = image_converter()
+    ic = treasure_finder()
 
     try:
         rospy.spin()
