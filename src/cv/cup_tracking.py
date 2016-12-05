@@ -17,20 +17,22 @@ class cup:
 class image_converter:
     def __init__(self):
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/cameras/left_hand_camera/image",Image,self.callback)
-        self.treasure_pub = rospy.Publisher("treasure_point",Point,queue_size=10)
-        self.treasure_point = Point()
+        self.image_sub = rospy.Subscriber("/cameras/left_hand_camera/image",Image,self.find_cups)
+        self.treasure_location_sub = rospy.Subscriber("/treasure_location",Treasure,self.find_treasure)
+        self.treasure_cup_pub = rospy.Publisher("treasure_cup_location",Point,queue_size=10)
+        self.treasure_cup_location = Point()
         self.cups = []
         self.cupCenters = [[0,0],[0,0],[0,0]]
+        self.wasPreviouslyTrue = False
         self.flag = False
         self.minRadius = 10
         for i in range(0,3):
             self.cups.append(cup())
             print self.cups[i].containsTreasure
 
-        self.cups[0].containsTreasure = True
+        # self.cups[0].containsTreasure = True
 
-    def callback(self,data):
+    def find_cups(self,data):
         try:
             imgOriginal = self.bridge.imgmsg_to_cv2(data,"bgr8")
         except CvBridgeError as e:
@@ -73,13 +75,6 @@ class image_converter:
                     self.flag = True
                 else:
                     for i in range(0,3):
-                        print "BEFORE"
-                        print "Cup 1 Current Location:",self.cups[0].currentPoint
-                        print "Cup 2 Current Location:",self.cups[1].currentPoint
-                        print "Cup 3 Current Location:",self.cups[2].currentPoint
-                        print "cupCenter1:",self.cupCenters[0]
-                        print "cupCenter2:",self.cupCenters[1]
-                        print "cupCenter3:",self.cupCenters[2]
                         self.cups[i].currentPoint = self.cupCenters[closestPoint(self.cups[i].currentPoint,self.cupCenters)]
                         if i==0:
                             cv2.circle(imgOriginal,(int(self.cups[i].currentPoint[0]),int(self.cups[i].currentPoint[1])),int(radius[i]),(255,0,0),2)
@@ -88,7 +83,9 @@ class image_converter:
                         if i==2:
                             cv2.circle(imgOriginal,(int(self.cups[i].currentPoint[0]),int(self.cups[i].currentPoint[1])),int(radius[i]),(0,0,255),2)
                         cv2.circle(imgOriginal,self.cups[i].currentPoint,5,(0,0,255),-1)
-                        print "AFTER"
+                        print "cupCenter1:",self.cupCenters[0]
+                        print "cupCenter2:",self.cupCenters[1]
+                        print "cupCenter3:",self.cupCenters[2]
                         print "Cup 1 Current Location:",self.cups[0].currentPoint
                         print "Cup 2 Current Location:",self.cups[1].currentPoint
                         print "Cup 3 Current Location:",self.cups[2].currentPoint
@@ -102,14 +99,22 @@ class image_converter:
         for i in range(0,3):
             if self.cups[i].containsTreasure:
                 print "Cup #",i,"CONTAINS TREASURE"
-                self.treasure_point.x = 640-self.cups[i].currentPoint[0]
-                self.treasure_point.y = self.cups[i].currentPoint[1]
-                self.treasure_pub.publish(self.treasure_point)
+                self.treasure_cup_location.x = 640-self.cups[i].currentPoint[0] # might not need 640 minus
+                self.treasure_cup_location.y = self.cups[i].currentPoint[1]
+                self.treasure_cup_pub.publish(self.treasure_cup_location)
         flipped = cv2.flip(imgOriginal, 1)
         output = cv2.flip(output, 1)
         cv2.imshow("Image",flipped)
         cv2.imshow("MyImage",output)
         cv2.waitKey(3)
+
+    def find_treasure(self,data):
+        if data.flag is False and self.wasPreviouslyTrue is True:
+            treasureCupIndex = closestPoint((data.x,data.y),self.cups.currentPoint)
+            self.cups[treasureCupIndex].containsTreasure = True
+            print "CUP #",treasureCupIndex+1,"contains treasure!!!"
+        if data.flag is True and self.wasPreviouslyTrue is False:
+            self.wasPreviouslyTrue = True
 
 def closestPoint(currentPoint,cupCenters):
     minimumDist = distance.euclidean(currentPoint,cupCenters[0])
