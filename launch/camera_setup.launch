@@ -1,9 +1,25 @@
 <launch>
 
-  <node name="leftarm_setup" pkg="shell_game" type="leftarm_setup.py" />
+  <!-- left arm joint angles to achieve desired camera position to -->
+  <param name="left_w0" value="1.3679273675968178"/>
+  <param name="left_w1" value="1.8338740319170121"/>
+  <param name="left_w2" value="-0.1234854534247758"/>
+  <param name="left_e0" value="-1.3591069780664766"/>
+  <param name="left_e1" value="-0.04410194765170564"/>
+  <param name="left_s0" value="-0.8881748761856546"/>
+  <param name="left_s1" value="-0.27074760906177553"/>
 
+  <!-- open Baxter's left hand camera with desired properties -->
+  <node name="camera_control" pkg="baxter_tools" type="camera_control.py" >
+    <args="-o left_hand_camera -r 640x400"/>
+  </node>
+
+  <!-- view image being published by Baxter's left hand camera  -->
   <node name="image_view" pkg="image_view" type="image_view" >
     <remap from="/image" to="/cameras/left_hand_camera/image" />
   </node>
+
+  <!-- run node that sends baxter's camera to the home position -->
+  <node name="leftarm_setup" pkg="shell_game" type="leftarm_setup.py" />
 
 </launch>
