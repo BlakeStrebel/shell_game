@@ -40,7 +40,7 @@ class image_converter:
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
         lower = np.array([0,100,100])
-        upper = np.array([50,255,255])
+        upper = np.array([20,255,255])
         mask = cv2.inRange(hsv, lower, upper)
         mask = cv2.erode(mask, None, iterations=7)
         mask = cv2.dilate(mask, None, iterations=7)

@@ -4,8 +4,6 @@ import rospy
 import planningnode as pnode
 from gripnode import GripperClient
 
-from shell_game import MsgType
-
 import rospy
 import image_geometry
 from sensor_msgs.msg import CameraInfo
@@ -18,11 +16,14 @@ pixelInfo = None
 cameraInfo = None
 
 def convertTo3D(pixelInfo, camera_model, camera_x, camera_y):
+    print "PIXEL INFO",pixelInfo
+    print "CAMERA X",camera_x
+    print "CAMERA Y",camera_y
     ray = camera_model.projectPixelTo3dRay(pixelInfo)
+    print "RAY",ray
     x = camera_x + ray[0]
     y = camera_y + ray[1]
     return (x, y)
-
 
 def initCamera(data):
     global cameraInfo
@@ -35,7 +36,6 @@ def getPixel(data):
 def getCameraState(data):
     global cameraStateInfo
     cameraStateInfo = data
-
 
 zsafe = -0.32+0.23+0.05
 zdrop = -0.32+0.18+0.05
@@ -64,8 +64,9 @@ def testnode(data):
 
     camera_model.fromCameraInfo(cameraInfo)
     print data
-    coords = convertTo3D(data[0],data[1], camera_model, camera_x, camera_y) #[0.48, -0.3]#
+    coords = convertTo3D((data.x,data.y), camera_model, camera_x, camera_y) #[0.48, -0.3]#
     print coords
+    coords = []
     rospy.sleep(2)
 
     des_pose = [coords[0], coords[1], -0.32+0.19+0.05, 0.99, 0.01, 0.01, 0.01]
@@ -80,7 +81,7 @@ def testnode(data):
     gc.command(position=100.0, effort=50.0)
     gc.wait()
     rospy.sleep(2)
-    
+
     pnode.initplannode(dsafe)
     rospy.sleep(2)
     pnode.initplannode(dpick)
@@ -102,9 +103,7 @@ def testnode(data):
     return
 
 if __name__ == '__main__':
+    print "plan node is running"
     rospy.init_node('plannode', log_level=rospy.INFO)
-    while():
-        raw_input("Press ENTER to continue.")
-        print "Gotcha!"
-        rospy.Subscriber("nameMessage", MsgType, testnode)
+    rospy.Subscriber("/treasure_point", Point, testnode)
     rospy.spin()
