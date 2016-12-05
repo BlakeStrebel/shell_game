@@ -50,7 +50,15 @@ def testnode(data):
     # z: 0.433126480405
 
     print data
-    coords = [ ((data.x-320)*0.0023*0.40 + 0.75 + 0.02), ((data.y-200)*0.0023*0.40 + 0.13 + 0.02)]
+    resX = 640          # camera resolution in pixels
+    resY = 400
+    pixel_size = 0.0023 # meters per pixel @ 1 meter camera height
+    offset_x = .02      # gripper offset
+    offset_y -.02
+    h = 0.40            # height from table to camera
+    camera_x = 0.75     # camera position in base frame
+    camera_y = 0.13
+    coords = [ ((data.x-resX/2)*pixel_size*h + camera_x + offset_x), ((data.y-resY/2)*pixel_size*h + camera_y + offset_y)]
     print coords
     rospy.sleep(2)
 
