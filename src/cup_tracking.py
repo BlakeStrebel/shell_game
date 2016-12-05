@@ -64,7 +64,7 @@ class image_converter:
             if radius[0] > self.minRadius and radius[1] > self.minRadius and radius[2] > self.minRadius:
                 for i in range(0,3):
                     M = cv2.moments(contours[i])
-                    self.cupCenters[i] = (int(M["m10"]/M["m00"]),int(M["m01"]/M["m00"]))
+                    self.cupCenters[i] = (640-int(M["m10"]/M["m00"]),int(M["m01"]/M["m00"]))
                 if self.flag is False:
                     print "RESET"
                     for i in range(0,3):

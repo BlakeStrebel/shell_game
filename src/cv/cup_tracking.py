@@ -102,7 +102,7 @@ class image_converter:
         for i in range(0,3):
             if self.cups[i].containsTreasure:
                 print "Cup #",i,"CONTAINS TREASURE"
-                self.treasure_point.x = self.cups[i].currentPoint[0]
+                self.treasure_point.x = 640-self.cups[i].currentPoint[0]
                 self.treasure_point.y = self.cups[i].currentPoint[1]
                 self.treasure_pub.publish(self.treasure_point)
         flipped = cv2.flip(imgOriginal, 1)

@@ -37,7 +37,7 @@ def getCameraState(data):
     global cameraStateInfo
     cameraStateInfo = data
 
-zsafe = -0.32+0.23+0.05
+zsafe = -0.32+0.33+0.05
 zdrop = -0.32+0.18+0.05
 zpick = -0.32+0.13+0.05
 
@@ -45,12 +45,13 @@ def testnode(data):
 
     gc = GripperClient()
 
+    # x: 0.683145146599
+    # y: 0.0731765874398
+    # z: 0.433126480405
+
     print data
-    print ((data.x-640)*0.0023*0.24 + 0.72 + 0.2)
-    print ((data.y-400)*0.0023*0.24 + 0.17 + 0.2)
-    coords = [ ((data.x-640)*0.0015*0.24 + 0.769 + 0.02), ((data.y-400)*0.0015*0.24 + 0.03 + 0.02)]
+    coords = [ ((data.x-320)*0.0023*0.40 + 0.75 + 0.02), ((data.y-200)*0.0023*0.40 + 0.13 + 0.02)]
     print coords
-    coords = []
     rospy.sleep(2)
 
     des_pose = [coords[0], coords[1], -0.32+0.19+0.05, 0.99, 0.01, 0.01, 0.01]
@@ -71,7 +72,7 @@ def testnode(data):
     pnode.initplannode(dpick)
     rospy.sleep(2)
 
-    gc.command(position=70.0, effort=50.0)
+    gc.command(position=50.0, effort=50.0)
     gc.wait()
 
     pnode.initplannode(dsafe)
