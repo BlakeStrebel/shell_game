@@ -39,8 +39,8 @@ class image_converter:
         blurred = cv2.GaussianBlur(imgOriginal,(11,11),0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-        lower = np.array([0,100,100])
-        upper = np.array([50,255,255])
+        lower = np.array([0,130,80])    # red hsv range
+        upper = np.array([3,190,255])
         mask = cv2.inRange(hsv, lower, upper)
         mask = cv2.erode(mask, None, iterations=7)
         mask = cv2.dilate(mask, None, iterations=7)
