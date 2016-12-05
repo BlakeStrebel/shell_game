@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from geometry_msgs.msg import Point
 from sensor_msgs.msg import Image
+from shell_game.msg import Treasure
 from cv_bridge import CvBridge, CvBridgeError
 from scipy.spatial import distance
 
@@ -98,7 +99,7 @@ class image_converter:
 
         for i in range(0,3):
             if self.cups[i].containsTreasure:
-                print "Cup #",i,"CONTAINS TREASURE"
+                print "Cup #",i+1,"CONTAINS TREASURE"
                 self.treasure_cup_location.x = 640-self.cups[i].currentPoint[0] # might not need 640 minus
                 self.treasure_cup_location.y = self.cups[i].currentPoint[1]
                 self.treasure_cup_pub.publish(self.treasure_cup_location)
@@ -110,8 +111,11 @@ class image_converter:
 
     def find_treasure(self,data):
         if data.flag is False and self.wasPreviouslyTrue is True:
-            treasureCupIndex = closestPoint((data.x,data.y),self.cups.currentPoint)
+            for i in range(0,3):
+                self.cups[i].containsTreasure = False
+            treasureCupIndex = closestPoint((data.x,data.y),(self.cups[0].currentPoint,self.cups[1].currentPoint,self.cups[2].currentPoint))
             self.cups[treasureCupIndex].containsTreasure = True
+            self.wasPreviouslyTrue = False
             print "CUP #",treasureCupIndex+1,"contains treasure!!!"
         if data.flag is True and self.wasPreviouslyTrue is False:
             self.wasPreviouslyTrue = True
