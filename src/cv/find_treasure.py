@@ -5,14 +5,15 @@ import cv2
 import numpy as np
 from geometry_msgs.msg import Point
 from sensor_msgs.msg import Image
+from shell_game.msg import Treasure
 from cv_bridge import CvBridge, CvBridgeError
 
 class treasure_finder:
     def __init__(self):
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/cameras/left_hand_camera/image",Image,self.callback)
-        self.pub = rospy.Publisher("initial_treasure_location",Point, queue_size=10)
-        self.treasurePoint = Point()
+        self.pub = rospy.Publisher("treasure_location",Treasure, queue_size=10)
+        self.treasurePoint = Treasure()
 
     def callback(self,data):
         try:
@@ -43,6 +44,10 @@ class treasure_finder:
             treasureCenter = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
             self.treasurePoint.x = treasureCenter[0]
             self.treasurePoint.y = treasureCenter[1]
+            self.treasurePoint.flag = 1
+            self.pub.publish(self.treasurePoint)
+        else:
+            self.treasurePoint.flag = 0
             self.pub.publish(self.treasurePoint)
 
 
