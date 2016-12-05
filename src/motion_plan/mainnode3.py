@@ -45,26 +45,10 @@ def testnode(data):
 
     gc = GripperClient()
 
-    camera_model = image_geometry.PinholeCameraModel()
-
-    cameraTopic = "/cameras/left_hand_camera/camera_info"
-    pixelTopic = "/shell_game/pixel_point"
-    cameraStateTopic = "/robot/limb/left/endpoint_state"
-
-    rospy.Subscriber(cameraTopic, CameraInfo, initCamera)
-    #rospy.Subscriber(pixelTopic, Point, getPixel)
-    rospy.Subscriber(cameraStateTopic, EndpointState, getCameraState)
-
-    rate = rospy.Rate(50)
-    while(cameraInfo is None) or (cameraStateInfo is None):
-        rate.sleep()
-
-    camera_x = cameraStateInfo.pose.position.x
-    camera_y = cameraStateInfo.pose.position.y
-
-    camera_model.fromCameraInfo(cameraInfo)
     print data
-    coords = convertTo3D((data.x,data.y), camera_model, camera_x, camera_y) #[0.48, -0.3]#
+    print ((data.x-640)*0.0023*0.24 + 0.72 + 0.2)
+    print ((data.y-400)*0.0023*0.24 + 0.17 + 0.2)
+    coords = [ ((data.x-640)*0.0015*0.24 + 0.769 + 0.02), ((data.y-400)*0.0015*0.24 + 0.03 + 0.02)]
     print coords
     coords = []
     rospy.sleep(2)
@@ -87,7 +71,7 @@ def testnode(data):
     pnode.initplannode(dpick)
     rospy.sleep(2)
 
-    gc.command(position=4.0, effort=50.0)
+    gc.command(position=70.0, effort=50.0)
     gc.wait()
 
     pnode.initplannode(dsafe)
@@ -99,6 +83,8 @@ def testnode(data):
 
     gc.command(position=100.0, effort=50.0)
     gc.wait()
+
+
 
     return
 
