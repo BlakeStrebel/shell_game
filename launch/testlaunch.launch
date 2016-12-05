@@ -15,11 +15,11 @@
 
   <!-- Start the Gripper Action Server -->
   <node name="rsdk_gripper_action_server" pkg="baxter_interface" type="gripper_action_server.py" args="--gripper $(arg gripper)" required="true" />
-  
-  <node pkg="baxter_interface" type="joint_trajectory_action_server.py" name="joint_traj_action_srv" output="screen" 
+
+  <node pkg="baxter_interface" type="joint_trajectory_action_server.py" name="joint_traj_action_srv" output="screen"
 	respawn="false" />
-  
-  <node pkg="shell_game" type="mainnode3.py" name="plannode" output="screen" 
+
+  <node pkg="shell_game" type="mainnode3.py" name="plannode" output="screen"
 	respawn="false"/>
- 
+
 </launch>

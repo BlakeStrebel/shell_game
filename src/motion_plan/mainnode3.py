@@ -16,11 +16,14 @@ pixelInfo = None
 cameraInfo = None
 
 def convertTo3D(pixelInfo, camera_model, camera_x, camera_y):
+    print "PIXEL INFO",pixelInfo
+    print "CAMERA X",camera_x
+    print "CAMERA Y",camera_y
     ray = camera_model.projectPixelTo3dRay(pixelInfo)
+    print "RAY",ray
     x = camera_x + ray[0]
     y = camera_y + ray[1]
     return (x, y)
-
 
 def initCamera(data):
     global cameraInfo
@@ -33,7 +36,6 @@ def getPixel(data):
 def getCameraState(data):
     global cameraStateInfo
     cameraStateInfo = data
-
 
 zsafe = -0.32+0.23+0.05
 zdrop = -0.32+0.18+0.05
@@ -48,6 +50,7 @@ def testnode(data):
     print ((data.y-400)*0.0023*0.24 + 0.17 + 0.2)
     coords = [ ((data.x-640)*0.0015*0.24 + 0.769 + 0.02), ((data.y-400)*0.0015*0.24 + 0.03 + 0.02)]
     print coords
+    coords = []
     rospy.sleep(2)
 
     des_pose = [coords[0], coords[1], -0.32+0.19+0.05, 0.99, 0.01, 0.01, 0.01]
@@ -59,12 +62,10 @@ def testnode(data):
 
     print "Lets pick up the cup"
 
-    
-
     gc.command(position=100.0, effort=50.0)
     gc.wait()
     rospy.sleep(2)
-    
+
     pnode.initplannode(dsafe)
     rospy.sleep(2)
     pnode.initplannode(dpick)
@@ -83,11 +84,12 @@ def testnode(data):
     gc.command(position=100.0, effort=50.0)
     gc.wait()
 
-    
+
 
     return
 
 if __name__ == '__main__':
+    print "plan node is running"
     rospy.init_node('plannode', log_level=rospy.INFO)
     rospy.Subscriber("/treasure_point", Point, testnode)
     rospy.spin()
