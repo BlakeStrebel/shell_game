@@ -5,11 +5,8 @@ import numpy as np
 
 import rospy
 import moveit_commander
-import moveit_msgs.msg
 
 from std_msgs.msg import Header
-
-import time
 
 from baxter_core_msgs.srv import (
     SolvePositionIK,
@@ -30,7 +27,7 @@ def initplannode(des_pose):
     move_pos(des_pose)
     return
 
-def ik_timeout(req, timeout=3.0):
+def ik_timeout(req, timeout=5.0):
     limb = "right"
     ns = "ExternalTools/" + limb + "/PositionKinematicsNode/IKService"
     iksvc = rospy.ServiceProxy(ns, SolvePositionIK)
@@ -55,7 +52,7 @@ def ik_timeout(req, timeout=3.0):
             break
     return resp
 
-def move_pos(des_pose, timeout=3.0):
+def move_pos(des_pose, timeout=3):
     #right_arm_group = moveit_commander.MoveGroupCommander("right_arm")
     limb = "right"
     ns = "ExternalTools/" + limb + "/PositionKinematicsNode/IKService"
@@ -77,7 +74,7 @@ def move_pos(des_pose, timeout=3.0):
     # print ikreq
     try:
         rospy.wait_for_service(ns, 5.0)
-        resp = iksvc(ikreq)
+        resp = iksvc(ikreq) #Response that returns possible joint state values. Throws error on timeout.
     except (rospy.ServiceException, rospy.ROSException), e:
         rospy.loginfo("Service exception")
 
@@ -107,15 +104,19 @@ def move_pos(des_pose, timeout=3.0):
     else:
         print("INVALID POSE - No Valid Joint Solution Found.")
         print("Trying random seeds until timeout is reached")
-        ikt = ik_timeout(ikreq,timeout=timeout)
+        ikt = ik_timeout(ikreq, 5)
         print "\r\n","ikt = "
         print ikt
         print ""
-        if ikt is not None:
+        if ikt is not None or len(ikt.joints[0].position) != 0:
             des_joints = [0]*7
             for i in range(7):
+                print i
                 des_joints[i] = ikt.joints[0].position[i]
-            right_arm_group.set_joint_value_target(des_joints)
-            right_arm_group.plan()
-            right_arm_group.go()            
+            ra = moveit_commander.MoveGroupCommander("right_arm")
+            ra.set_joint_value_target(des_joints)
+            ra.plan()
+            ra.go()
+        else:
+            print "-------------EMPTY LIST or NOT A VALID POSITION------------"
     return

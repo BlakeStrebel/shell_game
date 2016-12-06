@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
-import rospy
-import planningnode as pnode
 from gripnode import GripperClient
 
 import rospy
 import image_geometry
 from sensor_msgs.msg import CameraInfo
-from geometry_msgs.msg import Point
 from baxter_core_msgs.msg import EndpointState
 import planningnode as pnode
 
@@ -15,10 +12,35 @@ cameraStateInfo = None
 pixelInfo = None
 cameraInfo = None
 
-def convertTo3D(pixelInfo, camera_model, camera_x, camera_y):
-    ray = camera_model.projectPixelTo3dRay(pixelInfo)
-    x = camera_x + ray[0]
-    y = camera_y + ray[1]
+# Left Arm Camera Position:
+# Position: x = .649, y = .129, z = .493
+# Orientation: x = 0.004, y = .999, 0.01
+
+
+def convertTo3D(pixelInfo, camera_model, camera_x, camera_y, camera_z):
+    val = camera_model.rectifyPoint(pixelInfo)
+    print "-----------------------------PIXEl--------------------------------"
+    print pixelInfo[0]
+    print pixelInfo[1]
+    print "-----------------------------VALUE--------------------------------"
+    print val
+    ray = camera_model.projectPixelTo3dRay(val)
+    # ray = camera_model.projectPixelTo3dRay(pixelInfo)
+    print "-----------------------------RAY--------------------------------"
+    print ray
+    print "-----------------------------CAMERA--------------------------------"
+    print camera_x
+    print camera_y
+    print camera_z
+
+    x = camera_x - ray[1]
+    y = camera_y - ray[0]
+
+    test = camera_model.project3dToPixel((y,x,camera_z+.33))
+    print "-----------------------------NEW PIXEL--------------------------------"
+    print test[0]
+    print test[1]
+
     return (x, y)
 
 
@@ -60,22 +82,26 @@ if __name__=='__main__':
 
     camera_x = cameraStateInfo.pose.position.x
     camera_y = cameraStateInfo.pose.position.y
+    camera_z = cameraStateInfo.pose.position.y
 
-    pixeldummy = Point()
-    pixeldummy.x = 27.0
-    pixeldummy.y = 52.0
+    # pixeldummy = Point()
+    # pixeldummy.x = 27.0
+    # pixeldummy.y = 52.05
     #pixeldummy.z = 89
 
     camera_model.fromCameraInfo(cameraInfo)
-    coords = convertTo3D([500,200], camera_model, camera_x, camera_y) #[0.48, -0.3]#
+    coords = convertTo3D([480,150], camera_model, camera_x, camera_y, camera_z) #[0.48, -0.3]#
+    print "-----------------COORDS----------------------"
     print coords
     rospy.sleep(2)
 
-    des_pose = [coords[0], coords[1], -0.32+0.19+0.05, 0.99, 0.01, 0.01, 0.01]
+    # des_pose = [coords[0], coords[1], -0.32+0.19+0.05, 0.99, 0.01, 0.01, 0.01]
+
+    # dsafe = [.17, 0.44, zsafe, 0.99, 0.01, 0.01, 0.01]
 
     dsafe = [coords[0], coords[1], zsafe, 0.99, 0.01, 0.01, 0.01]
-    dpick = [coords[0], coords[1], zpick, 0.99, 0.01, 0.01, 0.01]
-    ddrop = [0.75, -0.56, zdrop, 0.99, 0.01, 0.01, 0.01]
+    # dpick = [coords[0], coords[1], zpick, 0.99, 0.01, 0.01, 0.01]
+    # ddrop = [0.75, -0.56, zdrop, 0.99, 0.01, 0.01, 0.01]
     rospy.sleep(2)
 
     print "\r\nTesting position 1"
@@ -83,20 +109,21 @@ if __name__=='__main__':
     print "\r\nTesting position 1"
     gc.command(position=100.0, effort=50.0)
     gc.wait()
-    rospy.sleep(2)
+    rospy.sleep(5)
     
     pnode.initplannode(dsafe)
-    rospy.sleep(2)
-    pnode.initplannode(dpick)
-    rospy.sleep(2)
-
-    gc.command(position=4.0, effort=50.0)
-    gc.wait()
-
-    pnode.initplannode(dsafe)
-    rospy.sleep(2)
-    pnode.initplannode(ddrop)
-    rospy.sleep(2)
-
-    gc.command(position=100.0, effort=50.0)
-    gc.wait()
+    rospy.sleep(5)
+    # pnode.initplannode(dpick)
+    # rospy.sleep(5)
+    #
+    # gc.command(position=4.0, effort=50.0)
+    # gc.wait()
+    #
+    # pnode.initplannode(dsafe)
+    # rospy.sleep(5)
+    # pnode.initplannode(ddrop)
+    # rospy.sleep(5)
+    #
+    # gc.command(position=100.0, effort=50.0)
+    # gc.wait()
+    rospy.spin()
