@@ -21,6 +21,7 @@ class image_converter:
         self.image_sub = rospy.Subscriber("/cameras/left_hand_camera/image",Image,self.find_cups)
         self.treasure_location_sub = rospy.Subscriber("/treasure_location",Treasure,self.find_treasure)
         self.treasure_cup_pub = rospy.Publisher("treasure_cup_location",Point,queue_size=10)
+        self.image_tracking_pub = rospy.Publisher("/robot/xdisplay",Image,queue_size=10)
         self.treasure_cup_location = Point()
         self.cups = []
         self.cupCenters = [[0,0],[0,0],[0,0]]
@@ -42,8 +43,10 @@ class image_converter:
         blurred = cv2.GaussianBlur(imgOriginal,(11,11),0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-        lower = np.array([0,130,80])    # red hsv range
-        upper = np.array([3,190,255])
+        # lower = np.array([0,130,80])    # red hsv range
+        # upper = np.array([20,190,255])
+        lower = np.array([0,100,100])    # red hsv range
+        upper = np.array([3,255,255])
         mask = cv2.inRange(hsv, lower, upper)
         mask = cv2.erode(mask, None, iterations=7)
         mask = cv2.dilate(mask, None, iterations=7)
@@ -96,14 +99,8 @@ class image_converter:
                 self.treasure_cup_location.x = self.cups[i].currentPoint[0] # might not need 640 minus
                 self.treasure_cup_location.y = self.cups[i].currentPoint[1]
                 self.treasure_cup_pub.publish(self.treasure_cup_location)
-        # flipped = cv2.flip(imgOriginal, 1)
-        # output = cv2.flip(output, 1)
-        # flipped = cv2.flip(imgOriginal, 1)
-        # output = cv2.flip(output, 1)
         cv2.imshow("MyImage", output)
         cv2.imshow("Image", imgOriginal)
-        # cv2.imshow("Image",flipped)
-        # cv2.imshow("MyImage",output)
         cv2.waitKey(3)
 
     def find_treasure(self,data):

@@ -50,6 +50,9 @@ class treasure_finder:
             self.treasurePoint.flag = 0
             self.pub.publish(self.treasurePoint)
 
+        cv2.imshow("TreasureFilter", output)
+        cv2.waitKey(3)
+
 
 def main(args):
     rospy.init_node('find_treasure')
