@@ -1,5 +1,21 @@
 <launch>
 
+  <param name="left_w0" value="1.1171215087775526"/>
+  <param name="left_w1" value="1.8584177245231788"/>
+  <param name="left_w2" value="-0.9836651802315216"/>
+  <param name="left_e0" value="-1.5661943844310073"/>
+  <param name="left_e1" value="1.0488593637166517"/>
+  <param name="left_s0" value="-0.6952767921090638"/>
+  <param name="left_s1" value="-0.5530000740326917"/>
+
+  <param name="left2_w0" value="1.5485536053703253"/>
+  <param name="left2_w1" value="1.7909225698562206"/>
+  <param name="left2_w2" value="0.2611602291374917"/>
+  <param name="left2_e0" value="-1.7138400352649785"/>
+  <param name="left2_e1" value="0.37735927381981177"/>
+  <param name="left2_s0" value="-0.17525730501590853"/>
+  <param name="left2_s1" value="-0.3286553838044499"/>
+
   <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="1.28 0.10 0.19 0 0 0 base camera_link 1000" />
 
   <include file="$(find baxter_moveit_config)/launch/planning_context.launch">
@@ -10,6 +26,9 @@
     <arg name="allow_trajectory_execution" value="true"/>
   </include>
 
+  <node name="camera_control" pkg="baxter_tools" type="camera_control.py"
+    args="-o left_hand_camera -r 640x400"/>
+
   <!-- Gripper Argument -->
   <arg name="gripper" default="right" />
 
@@ -19,7 +38,9 @@
   <node pkg="baxter_interface" type="joint_trajectory_action_server.py" name="joint_traj_action_srv" output="screen"
 	respawn="false" />
 
-  <node pkg="shell_game" type="mainnode3.py" name="plannode" output="screen"
-	respawn="false"/>
+  <node pkg="shell_game" type="find_treasure.py" name="find_treasure" output="screen" respawn="true"/>
+  <node pkg="shell_game" type="cup_tracking.py" name="image_converter" output="screen" respawn="true"/>
+
+  <node pkg="shell_game" type="mainnode3.py" name="plannode" output="screen" respawn="false" launch-prefix="xterm -e "/>
 
 </launch>
