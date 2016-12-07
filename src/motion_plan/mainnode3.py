@@ -81,8 +81,24 @@ def testnode():
         camera_y = cameraStateInfo.pose.position.y
         camera_z = cameraStateInfo.pose.position.z
         # print data
-        coords = convertTo3D(treasurePoint, camera_model, camera_x, camera_y, camera_z)  # [0.48, -0.3]#
+        #coords = convertTo3D(treasurePoint, camera_model, camera_x, camera_y, camera_z)  # [0.48, -0.3]#
 
+        zoffset = -0.287811174717 # table height in baxter's frame
+        pixel_size = .0023 # camera calibration (meter/pixels)
+        h = camera_z-zoffset # height from table to camera
+        x0 = camera_x # x camera position
+        y0 = camera_y # y camera position
+        x_offset = 0 # offsets
+        y_offset = -.02
+        height = 400 # image frame dimensions
+        width = 640
+        cx = treasurePoint.x
+        cy = treasurePoint.y
+        # Convert pixel coordinates to baxter coordinates
+        xb = (cy - (height/2))*pixel_size*h + x0 + x_offset
+        yb = (cx - (width/2))*pixel_size*h + y0  + y_offset
+
+        coords = [xb,yb]
         rospy.sleep(2)
 
         des_pose = [coords[0], coords[1], -0.32+0.19+0.05, 0.99, 0.01, 0.01, 0.01]
@@ -101,28 +117,35 @@ def testnode():
         rospy.sleep(2)
 
         arm_goaway()
-        rospy.sleep(2)
+        rospy.sleep(0.1)
         pnode.initplannode(dsafe, "right")
-        rospy.sleep(2)
+        rospy.sleep(0.1)
         pnode.initplannode(dpick, "right")
-        rospy.sleep(2)
+        rospy.sleep(0.1)
 
         gc.command(position=50.0, effort=50.0)
         gc.wait()
 
         pnode.initplannode(dsafe, "right")
-        rospy.sleep(2)
+        rospy.sleep(0.1)
+        pnode.initplannode(dpick, "right")
+        rospy.sleep(0.1)
         # pnode.initplannode(ddropsafe, "right")
         # rospy.sleep(2)
-        pnode.initplannode(ddrop, "right")
-        rospy.sleep(2)
-        arm_setup()
-        rospy.sleep(2)
+        # pnode.initplannode(ddrop, "right")
+        # rospy.sleep(0.1)
+        # arm_setup()
+        # rospy.sleep(0.1)
 
         print "Lets drop the cup"
 
         gc.command(position=100.0, effort=50.0)
         gc.wait()
+
+        pnode.initplannode(dsafe, "right")
+        rospy.sleep(0.1)
+        pnode.initplannode(ddropsafe, "right")
+        rospy.sleep(0.1)
 
         return
 
