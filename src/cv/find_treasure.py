@@ -52,7 +52,7 @@ class treasure_finder:
 
 
 def main(args):
-    rospy.init_node('find_treasure', anonymous=True)
+    rospy.init_node('find_treasure')
     ic = treasure_finder()
 
     try:

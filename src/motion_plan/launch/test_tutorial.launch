@@ -1,0 +1,30 @@
+<launch>
+
+  <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="1.28 0.10 0.19 0 0 0 base camera_link 1000" />
+
+  <include file="$(find baxter_moveit_config)/launch/planning_context.launch">
+    <arg name="load_robot_description" value="true"/>
+  </include>
+
+  <include file="$(find baxter_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="true"/>
+  </include>
+
+  <node pkg="baxter_interface" type="joint_trajectory_action_server.py" name="joint_traj_action_srv" output="screen"
+  respawn="false" />
+
+  <node pkg="shell_game" type="move_arm_to_cup.py" name="test_moveit" output="screen"
+  respawn="true" launch-prefix="xterm -e "/>
+  <!-- <node pkg="nxr_baxter" type="moveit_interface.py" name="moveit_interface" output="screen" respawn="true"/> -->
+
+  <!-- <include file="$(find skeletontracker_nu)/launch/nu_skeletontracker.launch"/> -->
+  <!-- <include file="$(find baxter_moveit_config)/launch/planning_context.launch"> -->
+  <!--   <arg name="load_robot_description" value="true"/> -->
+  <!-- </include> -->
+
+  <!-- <include file="$(find baxter_moveit_config)/launch/move_group.launch"> -->
+  <!--   <arg name="allow_trajectory_execution" value="true"/> -->
+  <!-- </include> -->
+
+  <!-- <node pkg="nxr_baxter" type="test_plan_speeds.py" name="planning_test" output="screen"/> -->
+</launch>

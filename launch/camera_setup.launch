@@ -1,13 +1,25 @@
 <launch>
 
   <!-- left arm joint angles to achieve desired camera position to -->
-  <param name="left_w0" value="1.3679273675968178"/>
-  <param name="left_w1" value="1.8338740319170121"/>
-  <param name="left_w2" value="-0.1234854534247758"/>
-  <param name="left_e0" value="-1.3591069780664766"/>
-  <param name="left_e1" value="-0.04410194765170564"/>
-  <param name="left_s0" value="-0.8881748761856546"/>
-  <param name="left_s1" value="-0.27074760906177553"/>
+  <!--<param name="left_w0" value="1.3679273675968178"/>-->
+  <!--<param name="left_w1" value="1.8338740319170121"/>-->
+  <!--<param name="left_w2" value="-0.1234854534247758"/>-->
+  <!--<param name="left_e0" value="-1.3591069780664766"/>-->
+  <!--<param name="left_e1" value="-0.04410194765170564"/>-->
+  <!--<param name="left_s0" value="-0.8881748761856546"/>-->
+  <!--<param name="left_s1" value="-0.27074760906177553"/>-->
+  <!---->
+
+  <param name="left_w0" value="1.1171215087775526"/>
+  <param name="left_w1" value="1.8584177245231788"/>
+  <param name="left_w2" value="-0.9836651802315216"/>
+  <param name="left_e0" value="-1.5661943844310073"/>
+  <param name="left_e1" value="1.0488593637166517"/>
+  <param name="left_s0" value="-0.6952767921090638"/>
+  <param name="left_s1" value="-0.5530000740326917"/>
+
+
+  <!-- -1.5661943844310073, 1.0488593637166517, -0.6952767921090638, -0.5530000740326917, 1.1171215087775526, 1.8584177245231788, -0.9836651802315216-->
 
   <!-- open Baxter's left hand camera with desired properties -->
   <node name="camera_control" pkg="baxter_tools" type="camera_control.py"

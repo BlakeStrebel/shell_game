@@ -13,8 +13,8 @@ pixelInfo = None
 cameraInfo = None
 
 # Left Arm Camera Position:
-# Position: x = .649, y = .129, z = .493
-# Orientation: x = 0.004, y = .999, 0.01
+# Position: x = .745, y = .150, z = .499
+# Orientation: x = -.003, y = .996, z = 0.011, w = .082
 
 
 def convertTo3D(pixelInfo, camera_model, camera_x, camera_y, camera_z):
@@ -90,7 +90,7 @@ if __name__=='__main__':
     #pixeldummy.z = 89
 
     camera_model.fromCameraInfo(cameraInfo)
-    coords = convertTo3D([480,150], camera_model, camera_x, camera_y, camera_z) #[0.48, -0.3]#
+    coords = convertTo3D([370,250], camera_model, camera_x, camera_y, camera_z) #[0.48, -0.3]#
     print "-----------------COORDS----------------------"
     print coords
     rospy.sleep(2)
@@ -100,8 +100,8 @@ if __name__=='__main__':
     # dsafe = [.17, 0.44, zsafe, 0.99, 0.01, 0.01, 0.01]
 
     dsafe = [coords[0], coords[1], zsafe, 0.99, 0.01, 0.01, 0.01]
-    # dpick = [coords[0], coords[1], zpick, 0.99, 0.01, 0.01, 0.01]
-    # ddrop = [0.75, -0.56, zdrop, 0.99, 0.01, 0.01, 0.01]
+    dpick = [coords[0], coords[1], zpick, 0.99, 0.01, 0.01, 0.01]
+    ddrop = [0.75, -0.56, zdrop, 0.99, 0.01, 0.01, 0.01]
     rospy.sleep(2)
 
     print "\r\nTesting position 1"
@@ -113,17 +113,17 @@ if __name__=='__main__':
     
     pnode.initplannode(dsafe)
     rospy.sleep(5)
-    # pnode.initplannode(dpick)
-    # rospy.sleep(5)
-    #
-    # gc.command(position=4.0, effort=50.0)
-    # gc.wait()
-    #
-    # pnode.initplannode(dsafe)
-    # rospy.sleep(5)
-    # pnode.initplannode(ddrop)
-    # rospy.sleep(5)
-    #
-    # gc.command(position=100.0, effort=50.0)
-    # gc.wait()
+    pnode.initplannode(dpick)
+    rospy.sleep(5)
+
+    gc.command(position=4.0, effort=50.0)
+    gc.wait()
+
+    pnode.initplannode(dsafe)
+    rospy.sleep(5)
+    pnode.initplannode(ddrop)
+    rospy.sleep(5)
+
+    gc.command(position=100.0, effort=50.0)
+    gc.wait()
     rospy.spin()
