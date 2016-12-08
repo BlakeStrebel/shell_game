@@ -50,15 +50,17 @@ def testnode(data):
     # z: 0.433126480405
 
     print data
-    resX = 640          # camera resolution in pixels
-    resY = 400
-    pixel_size = 0.0023 # meters per pixel @ 1 meter camera height
-    offset_x = .02      # gripper offset
-    offset_y -.02
-    h = 0.40            # height from table to camera
-    camera_x = 0.75     # camera position in base frame
-    camera_y = 0.13
-    coords = [ ((data.x-resX/2)*pixel_size*h + camera_x + offset_x), ((data.y-resY/2)*pixel_size*h + camera_y + offset_y)]
+    # resX = 640          # camera resolution in pixels
+    # resY = 400
+    # pixel_size = 0.0023 # meters per pixel @ 1 meter camera height
+    # offset_x = .02      # gripper offset
+    # offset_y -.02
+    # h = 0.40            # height from table to camera
+    # camera_x = 0.75     # camera position in base frame
+    # camera_y = 0.13
+    # coords = [ ((data.x-resX/2)*pixel_size*h + camera_x + offset_x), ((data.y-resY/2)*pixel_size*h + camera_y + offset_y)]
+    camera_model.fromCameraInfo(cameraInfo)
+    coords = convertTo3D((500,200),camera_model,camera_x,camera_y)
     print coords
     rospy.sleep(2)
 
@@ -100,5 +102,5 @@ def testnode(data):
 if __name__ == '__main__':
     print "plan node is running"
     rospy.init_node('plannode', log_level=rospy.INFO)
-    rospy.Subscriber("/treasure_point", Point, testnode)
+    rospy.Subscriber("/treasure_cup_location", Point, testnode)
     rospy.spin()
