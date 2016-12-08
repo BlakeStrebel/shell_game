@@ -13,5 +13,5 @@
   <node pkg="baxter_interface" type="joint_trajectory_action_server.py" name="joint_traj_action_srv" output="screen"
 	respawn="false" />
 
-  <node pkg="shell_game" type="Pixel_to_Physical.py" name="convertpixeltocoord" output="screen" />
+  <node pkg="shell_game" type="mainnode2.py" name="convertpixeltocoord" output="screen" />
 </launch>

@@ -32,6 +32,7 @@ def getCameraState(data):
 
 
 def main():
+    rospy.sleep(60)
     rospy.init_node("convertpixeltocoord", anonymous=True)
     camera_model = image_geometry.PinholeCameraModel()
 
@@ -56,7 +57,7 @@ def main():
     #pixeldummy.z = 89
 
     camera_model.fromCameraInfo(cameraInfo)
-    coords = convertTo3D([500,200], camera_model, camera_x, camera_y)
+    coords = convertTo3D([0,0], camera_model, camera_x, camera_y)
     print coords
 
     des_pose = [coords[0], coords[1], -0.32+0.19+0.05, 0.99, 0.01, 0.01, 0.01]
