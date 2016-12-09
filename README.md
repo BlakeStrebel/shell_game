@@ -13,10 +13,10 @@ The purpose of this project was for Baxter to play a [shell game](https://en.wik
 ## Computer Vision ##
 
 ### cup_tracking node ###
-Description: The cup_tracking node finds the location of the three cups and keeps track of which one is which. This allows Baxter to track the cups and associate the treasure with one of them
+Description: The cup_tracking node finds the location of the three cups and keeps track of which one is which. This allows Baxter to track the cups and associate the treasure with one of them  
 Subscribes to:
 `/cameras/left_hand_camera/image`
-`/treasure_location`
+`/treasure_location`  
 Publishes to:
 `treasure_cup_location`
 `/robot/xdisplay`
