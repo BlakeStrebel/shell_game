@@ -15,6 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_msgs
   xacro
   message_generation
+  scipy
+  numpy
 )
 
 ## System dependencies are found with CMake's conventions
@@ -108,7 +110,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES shell_game
-#  CATKIN_DEPENDS actionlib baxter_core_msgs baxter_interface cv_bridge dynamic_reconfigure rospy sensor_msgs trajectory_msgs xacro
+#  CATKIN_DEPENDS actionlib baxter_core_msgs baxter_interface cv_bridge dynamic_reconfigure rospy sensor_msgs trajectory_msgs xacro message_generation scipy numpy
 #  DEPENDS system_lib
 )
 
