@@ -8,7 +8,7 @@ The purpose of this project was for Baxter to play a [shell game](https://en.wik
 
 [Link to demo video](https://youtu.be/6UPHq3FVivk)
 
-![overview](https://github.com/opti545/baxter_builder)
+![overview](https://github.com/BlakeStrebel/shell_game/blob/master/images/demo_image.png)
 
 ## Computer Vision ##
 
