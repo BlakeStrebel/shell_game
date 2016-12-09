@@ -22,3 +22,14 @@ The purpose of this project was for Baxter to play a [shell game](https://en.wik
 ### get_cup node ###
 
 ### planning node ###
+
+Motion planning here uses two main players - 
+1) Baxter's inbuilt IK solver
+
+2) MOVEIT! motion planning.
+
+A node is written to call ik_service and joints required by Baxter arm are accepted into planning server and MOVE-IT! plans trajectory in joint-space to reach the desired configuration.
+
+No scene is imported into the MOVEIT! configuration. Hence the only collision detection / avoidance it does is wrt its own parts (body, other arm).
+
+While solving IK, the random seed 'heuristic' is used to try for a specified time if solution is not found in the first go.
