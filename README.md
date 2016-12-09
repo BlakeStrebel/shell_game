@@ -32,7 +32,7 @@ Two main components of motion planning that we had to solve for was 1) Turning t
 We will describe below each of these components and how they were implemented for this project.
 
 ### Finding the Location of the Cup in the 3D World###
-The [get_cup.py] file is responsible for creating the ROS node, get_cup. This node is mainly responsible for converting the ROS topic, /treasure_cup_location (Point message that describes the pixel location of the cup containing the treasure), into (x,y) points in the real world relative to Baxter. This node subscribes to the topics: '/cameras/left_hand_camera/camera_info', '/robot/limb/left/endpoint_state','/robot/diigital_io/right_button/state', and '/treasure_cup_location'.
+The [get_cup.py] file is responsible for creating the ROS node, get_cup. This node is mainly responsible for converting the ROS topic, /treasure_cup_location (Point message that describes the pixel location of the cup containing the treasure), into (x,y) points in the real world relative to Baxter. This node subscribes to the topics: `/cameras/left_hand_camera/camera_info`, `/robot/limb/left/endpoint_state`,`/robot/diigital_io/right_button/state`, and `/treasure_cup_location`.
 
 Our first test code to try to solve this problem was to use the convertTo3D function. This function took the pixel info and adjusted the pixel values based on the calibration of the camera. After this adjustment, we used the projectPixelTo3DRay function found in the image_geometry package, to find a ray that would point to a 3D point in the world relative to the location of the camera. Applying these values to the current location of the camera will give us the position of the cup relative to Baxter.
 
