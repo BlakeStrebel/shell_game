@@ -24,8 +24,10 @@ class treasure_finder:
         blurred = cv2.GaussianBlur(imgOriginal,(11,11),0)
         hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-        lower = np.array([60,90,70])    # hsv range for green
-        upper = np.array([90,175,255])
+        # lower = np.array([60,90,70])    # hsv range for green
+        # upper = np.array([90,175,255])
+        lower = np.array([60,70,70])    # hsv range for green
+        upper = np.array([90,255,255])
         mask = cv2.inRange(hsv, lower, upper)
         mask = cv2.erode(mask, None, iterations=7)
         mask = cv2.dilate(mask, None, iterations=7)

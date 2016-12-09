@@ -101,6 +101,9 @@ class image_converter:
                 self.treasure_cup_pub.publish(self.treasure_cup_location)
         cv2.imshow("MyImage", output)
         cv2.imshow("Image", imgOriginal)
+        # image_message = self.bridge.cv2_to_imgmasg(imgOriginal,desired_encoding="passthrough")
+        image_message = self.bridge.cv2_to_imgmsg(imgOriginal,"bgr8")
+        self.image_tracking_pub.publish(image_message)
         cv2.waitKey(3)
 
     def find_treasure(self,data):
