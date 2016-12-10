@@ -4,7 +4,7 @@ Team members: Elton Cheng, Adam Pollack, Blake Strebel, Vismaya Walawalkar
 Instructor: Jarvis Schultz
 
 ## Overview ##
-The purpose of this project was for Baxter to play a [shell game](https://en.wikipedia.org/wiki/Shell_game) with the user. The game involves tracking the location of a hidden 'treasure' under three identical cups. The user shows the treasure to Baxter, places it under one of the cups, and shuffles them randomly on the workspace. Baxter uses a camera in one of his hands to track the cups, and, whenever the user is done shuffling, the user presses a button and Baxter picks up the cup containing the treasure.
+The purpose of this project was for Baxter to play a [shell game](https://en.wikipedia.org/wiki/Shell_game) with the user. The game involves tracking the location of a hidden 'treasure' under three identical cups. The user shows the treasure to Baxter, places it under one of the cups, and shuffles them randomly on the workspace. Baxter uses a camera in one of his hands to track the cups, and, whenever the user is done shuffling, Baxter picks up the cup containing the treasure.
 
 [Link to demo video](https://youtu.be/6UPHq3FVivk)
 
@@ -12,45 +12,51 @@ The purpose of this project was for Baxter to play a [shell game](https://en.wik
 
 ## Computer Vision ##
 
-### cup_tracking node ###
-Description: The cup_tracking node finds the location of the three cups and keeps track of which one is which. This allows Baxter to track the cups and associate the treasure with one of them  
+### find_treasure node ###
+Description: [find_treasure.py](https://github.com/BlakeStrebel/shell_game/blob/master/src/find_treasure.py) is responsible for finding the location of the treasure at any point during the game. This allows Baxter to identify if the user has switched the treasure from one cup into another at any point during the came. Treasure is defined as any green object placed in Baxter's field of view. This description could be adjusted to allow Baxter to identify different colors, shapes, etc.
 Subscribes to:
-`/cameras/left_hand_camera/image`
-`/treasure_location`  
+* `/cameras/left_hand_camera/image`
+Publishes:
+* `/treasure_location`: [treasure_location](https://github.com/BlakeStrebel/shell_game/blob/master/msg/Treasure.msg) is a custom message that contains a flag indicating if the treasure is currently in Baxter's field of view. It also contains two floats representing the current location of the treasure. If the treasure is not currently visible, it publishes its last known position.
+
+### cup_tracking node ###
+Description: [cup_tracking.py](https://github.com/BlakeStrebel/shell_game/blob/master/src/cup_tracking.py) finds the location of the three cups and keeps track of which one is which. This allows Baxter to track the cups and associate the treasure with one of them  
+Subscribes to:
+* `/cameras/left_hand_camera/image`
+* `/treasure_location`  
 Publishes to:
-`treasure_cup_location`
-`/robot/xdisplay`
+* `/treasure_cup_location`
+* `/robot/xdisplay`
 
-This node finds the location of the 3 red cups in the field of view. Once the 3 cups are found, the node tracks each cup by noting the position of each cup during each iteration and finding the cup in the next iteration which is closest. To determine which cup contains the treasure, this node subscribes to `/treasure_location` (a topic published by the find_treasure node). `/treasure_location` publishes a custom message consisting of a boolean value which defines whether or not the treasure is visible to Baxter, an x value, and a y value. The cup_tracking node checks the boolean value and if the visibility of the treasure goes from true to false, cup_tracking finds the nearest cup to that position and marks it as containing the treasure. Finally, the cup_tracking node publishes the location of the cup that contains the treasure.
+This node finds the location of the 3 red cups in the field of view. Once the 3 cups are found, the node tracks each cup by noting the position of each cup during each iteration and finding the cup in the next iteration which is closest. To determine which cup contains the treasure, this node subscribes to `/treasure_location` (published by the find_treasure node). `/treasure_location` is a custom message consisting of a boolean value which defines whether or not the treasure is visible to Baxter, a x value, and a y value. The cup_tracking node checks the boolean value, and, if the visibility of the treasure goes from true to false, it finds the nearest cup to that position and marks it as containing the treasure. Finally, the cup_tracking node publishes the location of the cup that contains the treasure in pixel coordinates.
 
-### find_treasure node
+## Motion Planning ##
+Motion planning nodes were responsible for:
+* Converting the pixel location of the cup with the treasure Baxter's coordinate frame
+* Determining the ideal path and joint angles needed to move Baxter's arm to pick up the cup
 
+### get_cup node ###
+Description: [get_cup.py](https://github.com/BlakeStrebel/shell_game/blob/master/src/get_cup.py) is responsible for converting the pixel location of the cup containing the treasure into real world coordinates usable by Baxter.
+Subscribes to:
+* `/cameras/left_hand_camera/camera_info`
+* `/robot/limb/left/endpoint_state`
+* `/robot/diigital_io/right_button/state`
+* `/treasure_cup_location`
 
-## Motion Planning
-Two main components of motion planning that we had to solve for was 1) Turning the pixel location of the cup with the treasure seen by our CV software into real world coordinates that Baxter's right arm can move to, and 2) Using an IK service to find the joint angles needed to get to that real world coordinate, as well as finding the ideal motion path for Baxter's right arm to take.
+This code utilizes the pixel conversion equation found in the [visual servoing example](http://sdk.rethinkrobotics.com/wiki/Worked_Example_Visual_Servoing) for Baxter:
 
-We will describe below each of these components and how they were implemented for this project.
+B = (Pp – Cp) * cc * d + Bp + Go
 
-### Finding the Location of the Cup in the 3D World###
-The [get_cup.py] file is responsible for creating the ROS node, get_cup. This node is mainly responsible for converting the ROS topic, /treasure_cup_location (Point message that describes the pixel location of the cup containing the treasure), into (x,y) points in the real world relative to Baxter. This node subscribes to the topics: `/cameras/left_hand_camera/camera_info`, `/robot/limb/left/endpoint_state`,`/robot/diigital_io/right_button/state`, and `/treasure_cup_location`.
+where:
+    B = Baxter coordinates
+    Pp = pixel coordinates
+    Cp = centre pixel coordinates
+    Bp = Baxter pose
+    Go = gripper offset
+    cc = camera calibration factor
+    d = distance from table
 
-Our first test code to try to solve this problem was to use the convertTo3D function. This function took the pixel info and adjusted the pixel values based on the calibration of the camera. After this adjustment, we used the projectPixelTo3DRay function found in the image_geometry package, to find a ray that would point to a 3D point in the world relative to the location of the camera. Applying these values to the current location of the camera will give us the position of the cup relative to Baxter.
+### planning node ###
+Description: [planningnode.py](https://github.com/BlakeStrebel/shell_game/blob/master/src/planningnode.py) uses Baxter's built in inverse kinematics solver and [MOVEIT!](http://moveit.ros.org/) motion planning to make Baxter's arm pick up the cup. This node calls Baxter's `ik_service` in order to determine the joint angles needed to achieve a desired end-effector position. Joint angles required are then fed into the planning server and `MOVE-IT!` plans a trajectory in joint-space to reach the desired configuration.
 
-However, this first generation of code did not work as well as intended, as there was always a slight offset to the cup, which was dependent on where the cup was located relative to the camera. I believe that this occurred due to how the cups and CV algorithm were used. Since the red cups were completely red, instead of just the top of the cup, the CV algorithm would return the center of the whole red shape seen instead of the top of the cup. This offset from the center of the cup would therefore cause an offset in the 3D location of the cup.
-
-The final generation of this calculation can be found in the testnode() function. The offsets and pixel size were hard-coded in, as the camera would be static during the whole tracking process. As a result of this, we were able to find the 3D coordinates more accurately, but only if the environment stays the same (ie, height of the table doesnt change, different camera poses, etc.)
-
-### Motion of the Arm ###
-Motion planning here uses two main players -
-1) Baxter's inbuilt IK solver
-
-2) MOVEIT! motion planning.
-
-A node is written to call ik_service and joints required by Baxter arm are accepted into planning server and MOVE-IT! plans trajectory in joint-space to reach the desired configuration.
-
-No scene is imported into the MOVEIT! configuration. Hence the only collision detection / avoidance it does is wrt its own parts (body, other arm).
-
-While solving IK, the random seed 'heuristic' is used to try for a specified time if solution is not found in the first go.
-
-
-[get_cup.py]:<https://github.com/BlakeStrebel/shell_game/blob/master/src/get_cup.py>
+Note: No scene is imported into the MOVEIT! configuration. Therefore, the only collision detection simulated is to prevent Baxter from colliding with himself.While solving inverse kinematics, the random seed heuristic is used if a solution is not found the first time.
