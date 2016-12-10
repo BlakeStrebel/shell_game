@@ -50,12 +50,12 @@ This code utilizes the pixel conversion equation found in the [visual servoing e
 B = (Pp – Cp) * cc * d + Bp + Go
 
 where:
-    B = Baxter coordinates
-    Pp = pixel coordinates
-    Cp = centre pixel coordinates
-    Bp = Baxter pose
-    Go = gripper offset
-    cc = camera calibration factor
+    B = Baxter coordinates,
+    Pp = pixel coordinates,
+    Cp = centre pixel coordinates,
+    Bp = Baxter pose,
+    Go = gripper offset,
+    cc = camera calibration factor,
     d = distance from table
 
 ### planning node ###
