@@ -1,6 +1,8 @@
 # Shell Game Project #
 Northwestern University ME495: Embedded Systems in Robotics (Fall 2016)
+
 Team members: Elton Cheng, Adam Pollack, Blake Strebel, Vismaya Walawalkar
+
 Instructor: Jarvis Schultz
 
 ## Overview ##
